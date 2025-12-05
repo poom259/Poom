@@ -1,0 +1,40 @@
+-- Simple Map Mode (Reduce Lag Script)
+-- LocalScript
+
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+-- ปรับแสงให้เรียบง่าย
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 100000
+Lighting.Brightness = 1
+Lighting.Ambient = Color3.new(1, 1, 1)
+
+-- ฟังก์ชันทำให้ทุก Part เรียบง่าย
+local function simplifyPart(part)
+	if part:IsA("BasePart") then
+		part.Material = Enum.Material.Plastic
+		part.Reflectance = 0
+	end
+	if part:IsA("Decal") or part:IsA("Texture") or part:IsA("SurfaceAppearance") then
+		part:Destroy()
+	end
+end
+
+-- ทำกับทุกของที่มีอยู่แล้ว
+for _, obj in ipairs(workspace:GetDescendants()) do
+	simplifyPart(obj)
+end
+
+-- ถ้ามีของใหม่ในแมพจะทำให้ง่ายด้วย
+workspace.DescendantAdded:Connect(simplifyPart)
+
+-- ปิดเอฟเฟกต์ PostEffect ที่กินเครื่อง
+for _, effect in ipairs(Lighting:GetChildren()) do
+	if effect:IsA("PostEffect") then
+		effect.Enabled = false
+	end
+end
+
+-- ลดความถี่ Render (ลดโหลด CPU)
+RunService:Set3dRenderingEnabled(true) -- ถ้าอยากปิดภาพ 3D เลยให้เป็น false
